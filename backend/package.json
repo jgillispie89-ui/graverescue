@@ -1,0 +1,36 @@
+{
+  "name": "graverescue-backend",
+  "version": "0.1.0",
+  "description": "API for GraveRescue — Forgotten Cemetery Atlas",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1036.0",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "nodemailer": "^8.0.5",
+    "pg": "^8.12.0",
+    "resend": "^6.12.2",
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.1.0",
+    "@types/node": "^20.14.0",
+    "@types/nodemailer": "^8.0.0",
+    "@types/pg": "^8.11.6",
+    "tsx": "^4.15.0",
+    "typescript": "^5.4.5"
+  }
+}

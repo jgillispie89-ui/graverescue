@@ -21,7 +21,9 @@ const s3 = new S3Client({
 });
 
 const app = express();
-app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173' }));
+const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
+    .split(',').map(o => o.trim());
+app.use(cors({ origin: (origin, cb) => cb(null, !origin || allowedOrigins.includes(origin)) }));
 app.use(express.json());
 
 // =============================================================================

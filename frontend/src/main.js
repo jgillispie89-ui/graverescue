@@ -635,6 +635,37 @@ document.getElementById('nav-feedback')?.addEventListener('click', (e) => {
 });
 
 // =============================================================================
+// Guidelines modal
+// =============================================================================
+function openGuidelinesModal() {
+    document.getElementById('guidelines-modal').classList.remove('hidden');
+}
+function closeGuidelinesModal() {
+    document.getElementById('guidelines-modal').classList.add('hidden');
+}
+document.getElementById('guidelines-close').addEventListener('click', closeGuidelinesModal);
+document.getElementById('guidelines-done').addEventListener('click', closeGuidelinesModal);
+document.getElementById('guidelines-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeGuidelinesModal();
+});
+document.getElementById('nav-guidelines')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openGuidelinesModal();
+});
+document.getElementById('footer-guidelines')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openGuidelinesModal();
+});
+document.getElementById('footer-feedback')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openFeedbackModal();
+});
+document.getElementById('sf-guidelines-link')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openGuidelinesModal();
+});
+
+// =============================================================================
 // State
 // =============================================================================
 let cemeteryFeatures = [];
@@ -815,6 +846,7 @@ function openSiteForm() { document.getElementById('site-form').classList.remove(
 function closeSiteForm() {
     document.getElementById('site-form').classList.add('hidden');
     document.getElementById('sf-status-msg').textContent = '';
+    document.getElementById('sf-guidelines-agree').checked = false;
     resetPhotoState();
     state.pendingPinLngLat = null;
 }
@@ -822,6 +854,11 @@ function closeSiteForm() {
 document.getElementById('sf-cancel').addEventListener('click', closeSiteForm);
 document.getElementById('sf-submit').addEventListener('click', async () => {
     const msg = document.getElementById('sf-status-msg');
+    if (!document.getElementById('sf-guidelines-agree').checked) {
+        msg.textContent = '✕ Please read and agree to the Contribution Guidelines before submitting.';
+        msg.className   = 'form-status err';
+        return;
+    }
     const [lng, lat] = state.pendingPinLngLat || [null, null];
     const body = {
         name:               document.getElementById('sf-name').value.trim(),

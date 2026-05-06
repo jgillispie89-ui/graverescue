@@ -37,6 +37,7 @@
             <a href="#about">About</a>
             <a href="#contribute">Contribute</a>
             <a href="#" id="nav-feedback">Feedback</a>
+            <a href="#" id="nav-guidelines">Guidelines</a>
             <div id="nav-auth"></div>
         </nav>
     </header>
@@ -165,6 +166,10 @@
                 <div id="sf-photo-url-row" class="hidden">
                     <input type="url" id="sf-photo-url" placeholder="https://… direct image link" style="width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px;font-family:inherit;margin-bottom:8px">
                 </div>
+                <label class="sf-guidelines-check">
+                    <input type="checkbox" id="sf-guidelines-agree">
+                    I have read and agree to the <a href="#" class="guidelines-link" id="sf-guidelines-link">Contribution Guidelines</a>
+                </label>
                 <div class="form-btns">
                     <button id="sf-cancel" class="btn-secondary">Cancel</button>
                     <button id="sf-submit" class="btn-primary">Submit</button>
@@ -267,6 +272,46 @@
         </div>
     </div>
 
+    <!-- Guidelines modal -->
+    <div id="guidelines-modal" class="modal hidden">
+        <div class="modal-box guidelines-modal-box">
+            <button class="close-btn" id="guidelines-close">×</button>
+            <h3>GraveRescue Contribution Guidelines</h3>
+            <p class="guidelines-intro">GraveRescue exists to document and help preserve forgotten cemeteries. To keep this work respectful, lawful, and useful, everyone who contributes agrees to the following.</p>
+
+            <h4>Respect the dead and their families.</h4>
+            <p>Cemeteries are sacred to the people connected to them. Treat every site — and every submission — with the same respect you'd want for your own family's graves. Avoid speculation, gossip, or anything you wouldn't say to a descendant standing next to you.</p>
+
+            <h4>Never trespass.</h4>
+            <p>Many forgotten cemeteries are on private land. Always get the landowner's permission before visiting, photographing, or working on a cemetery that isn't on public property. "I didn't see a No Trespassing sign" is not permission. If you can't reach the owner, don't go.</p>
+
+            <h4>Never vandalize, disturb, or remove anything.</h4>
+            <p>Do not move, clean aggressively, dig, probe, or alter gravestones, fences, plantings, or the ground itself without working with a qualified preservation group and the landowner. Well-intentioned cleaning has destroyed more historic stones than weather has. Document, photograph, report — don't fix.</p>
+
+            <h4>Do not submit pre-contact or ancient Indigenous burial sites.</h4>
+            <p>These sites are protected under federal law (NAGPRA) and many state laws. Publicizing their locations can lead to looting and desecration. For historical-era Native American cemeteries, please consult with the relevant tribe or descendant community before submitting locations.</p>
+
+            <h4>Only submit photos and information you have the right to share.</h4>
+            <p>Don't upload photos taken by someone else without their permission. Don't copy descriptions or research from other websites, books, or archives without attribution and permission. By submitting, you confirm the content is yours to share.</p>
+
+            <h4>Be careful with recent burials.</h4>
+            <p>Avoid publishing personal details (cause of death, family disputes, private information) about anyone buried in the last 75 years. Stick to what's on the stone and what's part of the public historical record.</p>
+
+            <h4>Be accurate. Cite sources when you can.</h4>
+            <p>If you're not sure about something, say so. "Local oral history says…" is more honest than presenting guesses as fact. We'd rather have less information than wrong information.</p>
+
+            <h4>Moderation.</h4>
+            <p>All submissions are reviewed before going live. We may edit, decline, or remove content that doesn't follow these guidelines. If you're a family member, landowner, or tribal representative who wants something corrected or removed, contact us through the Feedback form and we will respond promptly.</p>
+
+            <h4>Liability.</h4>
+            <p>GraveRescue is a volunteer documentation project. We are not responsible for what contributors or visitors do at the cemeteries listed here. You are responsible for your own actions, including obeying all laws regarding trespass, property, and burial sites in your area.</p>
+
+            <div class="form-btns" style="margin-top:20px">
+                <button class="btn-primary" id="guidelines-done">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Lightbox -->
     <div id="lightbox" class="hidden">
         <button class="lb-close" id="lb-close">×</button>
@@ -275,6 +320,14 @@
         <button class="lb-nav lb-next hidden" id="lb-next">&#8250;</button>
         <div class="lb-counter hidden" id="lb-counter"></div>
     </div>
+
+    <footer id="site-footer">
+        <span>GraveRescue — Forgotten Cemetery Atlas</span>
+        <span class="footer-sep">·</span>
+        <a href="#" id="footer-guidelines">Contribution Guidelines</a>
+        <span class="footer-sep">·</span>
+        <a href="#" id="footer-feedback">Feedback</a>
+    </footer>
 
     <script type="module" src="/src/main.js"></script>
 </body>

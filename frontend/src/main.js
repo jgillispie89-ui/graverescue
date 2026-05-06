@@ -849,7 +849,7 @@ function openSiteForm() { document.getElementById('site-form').classList.remove(
 function closeSiteForm() {
     document.getElementById('site-form').classList.add('hidden');
     document.getElementById('sf-status-msg').textContent = '';
-    document.getElementById('sf-guidelines-agree').checked = false;
+    document.getElementById('sf-agree-guidelines').checked = false;
     document.getElementById('sf-disinterred-hint').style.display = 'none';
     resetPhotoState();
     state.pendingPinLngLat = null;
@@ -858,7 +858,7 @@ function closeSiteForm() {
 document.getElementById('sf-cancel').addEventListener('click', closeSiteForm);
 document.getElementById('sf-submit').addEventListener('click', async () => {
     const msg = document.getElementById('sf-status-msg');
-    if (!document.getElementById('sf-guidelines-agree').checked) {
+    if (!document.getElementById('sf-agree-guidelines').checked) {
         msg.textContent = '✕ Please read and agree to the Contribution Guidelines before submitting.';
         msg.className   = 'form-status err';
         return;

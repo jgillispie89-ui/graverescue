@@ -156,10 +156,12 @@
                 <div id="sf-photo-url-row" class="hidden">
                     <input type="url" id="sf-photo-url" placeholder="https://… direct image link" style="width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px;font-family:inherit;margin-bottom:8px">
                 </div>
-                <label class="sf-guidelines-check">
-                    <input type="checkbox" id="sf-guidelines-agree">
-                    <span>I have read and agree to the <a href="#" class="guidelines-link" id="sf-guidelines-link">Contribution Guidelines</a></span>
-                </label>
+                <div class="guidelines-agree">
+                    <input type="checkbox" id="sf-agree-guidelines">
+                    <label for="sf-agree-guidelines">
+                        I have read and agree to the <a href="#" id="sf-guidelines-link">Contribution Guidelines</a>
+                    </label>
+                </div>
                 <div class="form-btns">
                     <button id="sf-cancel" class="btn-secondary">Cancel</button>
                     <button id="sf-submit" class="btn-primary">Submit</button>

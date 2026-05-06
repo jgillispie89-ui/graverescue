@@ -56,14 +56,25 @@ async function migrate() {
     await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_send_failed BOOLEAN NOT NULL DEFAULT false`);
     await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_send_error TEXT`);
 
+    // If old 16-value enum exists, drop it (and the dependent table) and recreate
+    await pool.query(`
+        DO $$ BEGIN
+            IF EXISTS (
+                SELECT 1 FROM pg_enum e
+                JOIN pg_type t ON t.oid = e.enumtypid
+                WHERE t.typname = 'cemetery_type' AND e.enumlabel = 'family_farm'
+            ) THEN
+                DROP TABLE IF EXISTS cemeteries CASCADE;
+                DROP TYPE cemetery_type;
+            END IF;
+        END $$
+    `);
     await pool.query(`
         DO $$ BEGIN
             CREATE TYPE cemetery_type AS ENUM (
-                'family_farm','church_community','rural_community','urban',
-                'slave_cemetery','african_american','freedmen','prison',
-                'asylum_state_hospital','poor_farm_potters_field','military_veterans',
-                'religious_minority','epidemic_mass_burial','unmarked_unnamed',
-                'single_stone','unknown_other'
+                'family_private','church_community','african_american',
+                'native_american','institutional','military_veterans',
+                'religious','mass_burial','unknown_other'
             );
         EXCEPTION WHEN duplicate_object THEN NULL;
         END $$

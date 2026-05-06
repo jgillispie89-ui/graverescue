@@ -9,21 +9,14 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- CEMETERIES — point locations: all cemetery types
 -- =============================================================================
 CREATE TYPE cemetery_type AS ENUM (
-    'family_farm',
+    'family_private',
     'church_community',
-    'rural_community',
-    'urban',
-    'slave_cemetery',
     'african_american',
-    'freedmen',
-    'prison',
-    'asylum_state_hospital',
-    'poor_farm_potters_field',
+    'native_american',
+    'institutional',
     'military_veterans',
-    'religious_minority',
-    'epidemic_mass_burial',
-    'unmarked_unnamed',
-    'single_stone',
+    'religious',
+    'mass_burial',
     'unknown_other'
 );
 

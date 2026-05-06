@@ -48,21 +48,14 @@
         <aside id="sidebar">
             <section class="panel">
                 <h2>Cemetery Type</h2>
-                <label><input type="checkbox" data-filter="cemetery-type" value="family_farm" checked> Family / farm plot</label>
+                <label><input type="checkbox" data-filter="cemetery-type" value="family_private" checked> Family / private plot</label>
                 <label><input type="checkbox" data-filter="cemetery-type" value="church_community" checked> Church / community</label>
-                <label><input type="checkbox" data-filter="cemetery-type" value="rural_community" checked> Rural community</label>
-                <label><input type="checkbox" data-filter="cemetery-type" value="urban" checked> Urban</label>
-                <label><input type="checkbox" data-filter="cemetery-type" value="slave_cemetery" checked> Slave cemetery</label>
-                <label><input type="checkbox" data-filter="cemetery-type" value="african_american" checked> African American / Black</label>
-                <label><input type="checkbox" data-filter="cemetery-type" value="freedmen" checked> Freedmen cemetery</label>
-                <label><input type="checkbox" data-filter="cemetery-type" value="prison" checked> Prison / penitentiary</label>
-                <label><input type="checkbox" data-filter="cemetery-type" value="asylum_state_hospital" checked> Asylum / state hospital</label>
-                <label><input type="checkbox" data-filter="cemetery-type" value="poor_farm_potters_field" checked> Poor farm / potter's field</label>
+                <label><input type="checkbox" data-filter="cemetery-type" value="african_american" checked> African American</label>
+                <label><input type="checkbox" data-filter="cemetery-type" value="native_american" checked> Native American</label>
+                <label><input type="checkbox" data-filter="cemetery-type" value="institutional" checked> Institutional</label>
                 <label><input type="checkbox" data-filter="cemetery-type" value="military_veterans" checked> Military / veterans</label>
-                <label><input type="checkbox" data-filter="cemetery-type" value="religious_minority" checked> Religious minority</label>
-                <label><input type="checkbox" data-filter="cemetery-type" value="epidemic_mass_burial" checked> Epidemic / mass burial</label>
-                <label><input type="checkbox" data-filter="cemetery-type" value="unmarked_unnamed" checked> Unmarked / unnamed</label>
-                <label><input type="checkbox" data-filter="cemetery-type" value="single_stone" checked> Single stone</label>
+                <label><input type="checkbox" data-filter="cemetery-type" value="religious" checked> Religious</label>
+                <label><input type="checkbox" data-filter="cemetery-type" value="mass_burial" checked> Mass burial</label>
                 <label><input type="checkbox" data-filter="cemetery-type" value="unknown_other" checked> Unknown / other</label>
             </section>
 
@@ -115,22 +108,15 @@
                 <label>Name <input type="text" id="sf-name" placeholder="e.g. Puckett Family Cemetery"></label>
                 <label>Type
                     <select id="sf-type">
-                        <option value="family_farm">Family / farm plot</option>
-                        <option value="church_community">Church / community</option>
-                        <option value="rural_community">Rural community</option>
-                        <option value="urban">Urban</option>
-                        <option value="slave_cemetery">Slave cemetery</option>
-                        <option value="african_american">African American / Black cemetery</option>
-                        <option value="freedmen">Freedmen cemetery</option>
-                        <option value="prison">Prison / penitentiary</option>
-                        <option value="asylum_state_hospital">Asylum / state hospital</option>
-                        <option value="poor_farm_potters_field">Poor farm / potter's field</option>
+                        <option value="family_private">Family / private plot</option>
+                        <option value="church_community">Church or community cemetery</option>
+                        <option value="african_american">African American cemetery</option>
+                        <option value="native_american">Native American cemetery</option>
+                        <option value="institutional">Institutional (prison, asylum, poor farm, potter's field)</option>
                         <option value="military_veterans">Military / veterans</option>
-                        <option value="religious_minority">Religious minority (Jewish, Quaker, Shaker, etc.)</option>
-                        <option value="epidemic_mass_burial">Epidemic / mass burial</option>
-                        <option value="unmarked_unnamed">Unmarked / unnamed</option>
-                        <option value="single_stone">Single stone</option>
-                        <option value="unknown_other">Unknown / other</option>
+                        <option value="religious">Religious (Jewish, Quaker, Shaker, etc.)</option>
+                        <option value="mass_burial">Mass burial (epidemic, disaster)</option>
+                        <option value="unknown_other">Unknown / unmarked / other</option>
                     </select>
                 </label>
                 <label>Rescue Status

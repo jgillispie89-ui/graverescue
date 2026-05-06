@@ -671,11 +671,9 @@ document.getElementById('sf-guidelines-link')?.addEventListener('click', (e) => 
 let cemeteryFeatures = [];
 
 const ALL_CEMETERY_TYPES = [
-    'family_farm','church_community','rural_community','urban',
-    'slave_cemetery','african_american','freedmen','prison',
-    'asylum_state_hospital','poor_farm_potters_field','military_veterans',
-    'religious_minority','epidemic_mass_burial','unmarked_unnamed',
-    'single_stone','unknown_other',
+    'family_private','church_community','african_american',
+    'native_american','institutional','military_veterans',
+    'religious','mass_burial','unknown_other',
 ];
 
 const state = {
@@ -1288,22 +1286,15 @@ function renderEditForm(detail) {
     editPhotos           = [];
 
     const typeOpts = [
-        ['family_farm','Family / farm plot'],
-        ['church_community','Church / community'],
-        ['rural_community','Rural community'],
-        ['urban','Urban'],
-        ['slave_cemetery','Slave cemetery'],
-        ['african_american','African American / Black cemetery'],
-        ['freedmen','Freedmen cemetery'],
-        ['prison','Prison / penitentiary'],
-        ['asylum_state_hospital','Asylum / state hospital'],
-        ['poor_farm_potters_field',"Poor farm / potter's field"],
+        ['family_private','Family / private plot'],
+        ['church_community','Church or community cemetery'],
+        ['african_american','African American cemetery'],
+        ['native_american','Native American cemetery'],
+        ['institutional','Institutional (prison, asylum, poor farm, potter\'s field)'],
         ['military_veterans','Military / veterans'],
-        ['religious_minority','Religious minority'],
-        ['epidemic_mass_burial','Epidemic / mass burial'],
-        ['unmarked_unnamed','Unmarked / unnamed'],
-        ['single_stone','Single stone'],
-        ['unknown_other','Unknown / other'],
+        ['religious','Religious (Jewish, Quaker, Shaker, etc.)'],
+        ['mass_burial','Mass burial (epidemic, disaster)'],
+        ['unknown_other','Unknown / unmarked / other'],
     ];
     const statusOpts = [
         ['maintained','Maintained'],
@@ -1572,22 +1563,15 @@ function esc(s) { return String(s ?? '').replace(/[<>&"]/g, c => ({'<':'&lt;','>
 
 function prettyCemeteryType(t) {
     return ({
-        family_farm:             'Family / farm plot',
-        church_community:        'Church / community',
-        rural_community:         'Rural community',
-        urban:                   'Urban',
-        slave_cemetery:          'Slave cemetery',
-        african_american:        'African American / Black cemetery',
-        freedmen:                'Freedmen cemetery',
-        prison:                  'Prison / penitentiary',
-        asylum_state_hospital:   'Asylum / state hospital',
-        poor_farm_potters_field: "Poor farm / potter's field",
-        military_veterans:       'Military / veterans',
-        religious_minority:      'Religious minority',
-        epidemic_mass_burial:    'Epidemic / mass burial',
-        unmarked_unnamed:        'Unmarked / unnamed',
-        single_stone:            'Single stone',
-        unknown_other:           'Unknown / other',
+        family_private:    'Family / private plot',
+        church_community:  'Church or community cemetery',
+        african_american:  'African American cemetery',
+        native_american:   'Native American cemetery',
+        institutional:     'Institutional',
+        military_veterans: 'Military / veterans',
+        religious:         'Religious',
+        mass_burial:       'Mass burial',
+        unknown_other:     'Unknown / other',
     })[t] || t;
 }
 

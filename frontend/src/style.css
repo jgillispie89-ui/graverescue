@@ -92,11 +92,12 @@ main { flex: 1; display: grid; grid-template-columns: 260px 1fr; position: relat
 .panel .hint { font-size: 11px; color: #777; margin: 4px 0 0 0; line-height: 1.4; }
 
 .swatch { display: inline-block; width: 18px; height: 10px; border-radius: 50%; vertical-align: middle; margin-right: 2px; }
-.swatch-maintained { background: var(--gr-maintained); }
-.swatch-neglected  { background: var(--gr-rust); }
-.swatch-overgrown  { background: var(--gr-overgrown); }
-.swatch-lost       { background: var(--gr-lost); opacity: 0.75; }
-.swatch-reclaimed  { background: var(--gr-reclaimed); }
+.swatch-maintained  { background: var(--gr-maintained); }
+.swatch-neglected   { background: var(--gr-rust); }
+.swatch-overgrown   { background: var(--gr-overgrown); }
+.swatch-lost        { background: var(--gr-lost); opacity: 0.75; }
+.swatch-reclaimed   { background: var(--gr-reclaimed); }
+.swatch-disinterred { background: #6B5B73; }
 
 #map { width: 100%; height: 100%; background: #e5e2d8; }
 
@@ -136,11 +137,12 @@ main { flex: 1; display: grid; grid-template-columns: 260px 1fr; position: relat
     font-size: 11px; font-weight: 500; margin-right: 4px;
     background: var(--paper-2); border: 1px solid var(--border);
 }
-#detail-content .tag-maintained { background: #d9f0e6; border-color: #1D9E75; color: #0a5340; }
-#detail-content .tag-neglected  { background: #f8e6d1; border-color: #BA7517; color: #7a4a0e; }
-#detail-content .tag-overgrown  { background: #f0e0c8; border-color: #854F0B; color: #4a2800; }
-#detail-content .tag-lost       { background: #f8d9d9; border-color: #A32D2D; color: #6b1818; }
-#detail-content .tag-reclaimed  { background: #c8eee0; border-color: #0F6E56; color: #073d30; }
+#detail-content .tag-maintained  { background: #d9f0e6; border-color: #1D9E75; color: #0a5340; }
+#detail-content .tag-neglected   { background: #f8e6d1; border-color: #BA7517; color: #7a4a0e; }
+#detail-content .tag-overgrown   { background: #f0e0c8; border-color: #854F0B; color: #4a2800; }
+#detail-content .tag-lost        { background: #f8d9d9; border-color: #A32D2D; color: #6b1818; }
+#detail-content .tag-reclaimed   { background: #c8eee0; border-color: #0F6E56; color: #073d30; }
+#detail-content .tag-disinterred { background: #ede8f0; border-color: #6B5B73; color: #3d2f45; }
 #detail-content p { font-size: 13px; line-height: 1.6; color: #333; }
 #detail-content .dates { font-size: 12px; color: #555; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
 

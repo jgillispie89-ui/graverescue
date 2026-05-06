@@ -678,7 +678,7 @@ const ALL_CEMETERY_TYPES = [
 
 const state = {
     cemeteryTypes:    new Set(ALL_CEMETERY_TYPES),
-    rescueStatuses:   new Set(['maintained','neglected','overgrown','lost','reclaimed']),
+    rescueStatuses:   new Set(['maintained','neglected','overgrown','lost','reclaimed','disinterred']),
     pinMode:          false,
     pendingPinLngLat: null,
 };
@@ -840,11 +840,17 @@ document.getElementById('sf-photo-url-toggle').addEventListener('click', e => {
     document.getElementById('sf-photo-url-row').classList.toggle('hidden');
 });
 
+document.getElementById('sf-status').addEventListener('change', (e) => {
+    const hint = document.getElementById('sf-disinterred-hint');
+    hint.style.display = e.target.value === 'disinterred' ? 'block' : 'none';
+});
+
 function openSiteForm() { document.getElementById('site-form').classList.remove('hidden'); }
 function closeSiteForm() {
     document.getElementById('site-form').classList.add('hidden');
     document.getElementById('sf-status-msg').textContent = '';
     document.getElementById('sf-guidelines-agree').checked = false;
+    document.getElementById('sf-disinterred-hint').style.display = 'none';
     resetPhotoState();
     state.pendingPinLngLat = null;
 }
@@ -1137,11 +1143,12 @@ function addLayers() {
         paint: {
             'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 4, 14, 10],
             'circle-color': ['match', ['get', 'rescue_status'],
-                'maintained', '#1D9E75',
-                'neglected',  '#BA7517',
-                'overgrown',  '#854F0B',
-                'lost',       '#A32D2D',
-                'reclaimed',  '#0F6E56',
+                'maintained',  '#1D9E75',
+                'neglected',   '#BA7517',
+                'overgrown',   '#854F0B',
+                'lost',        '#A32D2D',
+                'reclaimed',   '#0F6E56',
+                'disinterred', '#6B5B73',
                 '#666'],
             'circle-stroke-color': '#fff', 'circle-stroke-width': 1.5,
             'circle-opacity': ['match', ['get', 'rescue_status'], 'lost', 0.75, 1.0],
@@ -1302,6 +1309,7 @@ function renderEditForm(detail) {
         ['overgrown','Overgrown'],
         ['lost','Lost'],
         ['reclaimed','Reclaimed'],
+        ['disinterred','Disinterred / relocated'],
     ];
     const mkOpts = (opts, cur) => opts.map(([v, l]) =>
         `<option value="${v}"${v === cur ? ' selected' : ''}>${l}</option>`).join('');
@@ -1577,11 +1585,12 @@ function prettyCemeteryType(t) {
 
 function prettyRescueStatus(s) {
     return ({
-        maintained: 'Maintained',
-        neglected:  'Neglected',
-        overgrown:  'Overgrown',
-        lost:       'Lost',
-        reclaimed:  'Reclaimed',
+        maintained:  'Maintained',
+        neglected:   'Neglected',
+        overgrown:   'Overgrown',
+        lost:        'Lost',
+        reclaimed:   'Reclaimed',
+        disinterred: 'Disinterred / relocated',
     })[s] || s;
 }
 

@@ -25,7 +25,8 @@ CREATE TYPE rescue_status AS ENUM (
     'neglected',
     'overgrown',
     'lost',
-    'reclaimed'
+    'reclaimed',
+    'disinterred'
 );
 
 CREATE TABLE cemeteries (

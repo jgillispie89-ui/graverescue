@@ -71,6 +71,8 @@
                     <span class="swatch swatch-lost"></span> Lost</label>
                 <label><input type="checkbox" data-filter="rescue-status" value="reclaimed" checked>
                     <span class="swatch swatch-reclaimed"></span> Reclaimed</label>
+                <label><input type="checkbox" data-filter="rescue-status" value="disinterred" checked>
+                    <span class="swatch swatch-disinterred"></span> Disinterred / relocated</label>
             </section>
         </aside>
 
@@ -126,8 +128,10 @@
                         <option value="overgrown" selected>Overgrown</option>
                         <option value="lost">Lost</option>
                         <option value="reclaimed">Reclaimed</option>
+                        <option value="disinterred">Disinterred / relocated</option>
                     </select>
                 </label>
+                <p id="sf-disinterred-hint" class="hint" style="display:none;margin:-8px 0 8px 0">If known, please note where the remains were moved to in the description below.</p>
                 <label>City <input type="text" id="sf-city" placeholder="e.g. Harlan"></label>
                 <label>State <input type="text" id="sf-state" placeholder="e.g. KY" maxlength="2"></label>
                 <label>Year established <input type="number" id="sf-built" placeholder="e.g. 1843"></label>

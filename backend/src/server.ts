@@ -83,11 +83,12 @@ async function migrate() {
     await pool.query(`
         DO $$ BEGIN
             CREATE TYPE rescue_status AS ENUM (
-                'maintained','neglected','overgrown','lost','reclaimed'
+                'maintained','neglected','overgrown','lost','reclaimed','disinterred'
             );
         EXCEPTION WHEN duplicate_object THEN NULL;
         END $$
     `);
+    await pool.query(`ALTER TYPE rescue_status ADD VALUE IF NOT EXISTS 'disinterred'`);
 
     await pool.query(`
         CREATE TABLE IF NOT EXISTS cemeteries (

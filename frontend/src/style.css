@@ -189,7 +189,9 @@ main { flex: 1; display: grid; grid-template-columns: 260px 1fr; position: relat
 .modal.hidden { display: none; }
 .modal-box {
     background: white; border-radius: 10px; padding: 24px;
-    width: 440px; max-width: 95vw; max-height: 90vh; overflow-y: auto;
+    width: 560px; max-width: 90vw; max-height: 90vh;
+    overflow-y: auto; overflow-x: hidden;
+    box-sizing: border-box;
     box-shadow: 0 8px 40px rgba(0,0,0,0.2);
 }
 .modal-box h3 { margin: 0 0 16px 0; font-size: 17px; }
@@ -200,7 +202,7 @@ main { flex: 1; display: grid; grid-template-columns: 260px 1fr; position: relat
 }
 .modal-box input, .modal-box select, .modal-box textarea {
     width: 100%; padding: 7px 10px; border: 1px solid #ddd; border-radius: 5px;
-    font-size: 14px; font-family: inherit;
+    font-size: 14px; font-family: inherit; box-sizing: border-box;
 }
 .modal-box textarea { resize: vertical; }
 .form-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
@@ -714,7 +716,9 @@ main { flex: 1; display: grid; grid-template-columns: 260px 1fr; position: relat
     margin: 12px 0 4px 0 !important;
     cursor: pointer;
     line-height: 1.4;
+    width: 100%;
 }
 .sf-guidelines-check input[type="checkbox"] { flex-shrink: 0; margin-top: 2px; }
+.sf-guidelines-check span { flex: 1; min-width: 0; }
 .guidelines-link { color: var(--gr-rust); text-decoration: underline; }
 

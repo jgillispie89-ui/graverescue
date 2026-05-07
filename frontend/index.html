@@ -321,6 +321,47 @@
         <a href="#" id="footer-feedback">Feedback</a>
     </footer>
 
+    <!-- Add Headstone modal -->
+    <div id="headstone-form" class="modal hidden">
+        <div class="modal-box">
+            <button class="close-btn" id="hs-cancel-btn">×</button>
+            <h3>Add Headstone</h3>
+            <p class="hint" style="margin:-8px 0 14px 0">Only the name is required. All other fields are optional.</p>
+            <label>Name <span style="color:#A32D2D">*</span><input type="text" id="hs-name" placeholder="Full name as inscribed"></label>
+            <div style="display:flex;gap:8px">
+                <label style="flex:1">Birth year<input type="number" id="hs-birth-year" placeholder="e.g. 1843"></label>
+                <label style="flex:1">Month<input type="number" id="hs-birth-month" placeholder="1–12" min="1" max="12"></label>
+                <label style="flex:1">Day<input type="number" id="hs-birth-day" placeholder="1–31" min="1" max="31"></label>
+            </div>
+            <label>Birth place<input type="text" id="hs-birth-place" placeholder="e.g. County Cork, Ireland"></label>
+            <div style="display:flex;gap:8px">
+                <label style="flex:1">Death year<input type="number" id="hs-death-year" placeholder="e.g. 1901"></label>
+                <label style="flex:1">Month<input type="number" id="hs-death-month" placeholder="1–12" min="1" max="12"></label>
+                <label style="flex:1">Day<input type="number" id="hs-death-day" placeholder="1–31" min="1" max="31"></label>
+            </div>
+            <label>Death place<input type="text" id="hs-death-place" placeholder="e.g. Harlan County, KY"></label>
+            <label>Inscription / epitaph<textarea id="hs-inscription" rows="2" placeholder="Exact text from the stone"></textarea></label>
+            <label>Relationship<input type="text" id="hs-relationship" placeholder='e.g. "wife of John Smith", "infant son of..."'></label>
+            <label>Condition
+                <select id="hs-condition">
+                    <option value="">— unknown —</option>
+                    <option value="legible">Legible</option>
+                    <option value="partially_legible">Partially legible</option>
+                    <option value="illegible">Illegible</option>
+                    <option value="broken">Broken</option>
+                    <option value="missing">Missing / gone</option>
+                </select>
+            </label>
+            <div class="form-btns">
+                <button id="hs-cancel" class="btn-secondary">Cancel</button>
+                <button id="hs-submit" class="btn-primary">Submit</button>
+            </div>
+            <p id="hs-status-msg" class="form-status"></p>
+        </div>
+    </div>
+
+    <!-- Headstone detail view (inside detail panel, swapped in via JS) -->
+
     <script type="module" src="/src/main.js"></script>
 </body>
 </html>

@@ -727,3 +727,52 @@ main { flex: 1; display: grid; grid-template-columns: 260px 1fr; position: relat
 }
 .guidelines-agree a { color: var(--gr-rust); text-decoration: underline; }
 
+/* =============================================================================
+   Headstones section in detail panel
+   ============================================================================= */
+#headstones-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+.hs-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.hs-section-title { margin: 0; font-size: 14px; font-weight: 600; }
+.btn-add-headstone {
+    font-size: 12px; padding: 4px 10px; border-radius: 4px; cursor: pointer;
+    background: var(--gr-stone); color: white; border: none;
+}
+.btn-add-headstone:hover { background: #444; }
+
+.hs-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+    cursor: pointer;
+}
+.hs-row:last-child { border-bottom: none; }
+.hs-row:hover { background: var(--paper-2); margin: 0 -4px; padding: 8px 4px; border-radius: 4px; }
+.hs-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+.hs-thumb-placeholder { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: var(--paper-2); border-radius: 4px; font-size: 22px; flex-shrink: 0; }
+.hs-info { flex: 1; min-width: 0; }
+.hs-name { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hs-dates { font-size: 12px; color: #666; }
+.hs-condition { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 3px; display: inline-block; margin-top: 2px; }
+.hs-cond-legible           { background: #d9f0e6; color: #0a5340; }
+.hs-cond-partially_legible { background: #f8e6d1; color: #7a4a0e; }
+.hs-cond-illegible         { background: #f0e0c8; color: #4a2800; }
+.hs-cond-broken            { background: #f8d9d9; color: #6b1818; }
+.hs-cond-missing           { background: #f3f4f6; color: #6b7280; }
+
+.hs-empty { font-size: 13px; color: #888; padding: 10px 0; }
+
+/* Headstone detail view */
+.hs-detail-back { background: none; border: none; color: var(--gr-rust); cursor: pointer; font-size: 13px; padding: 0; margin-bottom: 12px; text-decoration: underline; display: block; }
+.hs-detail-name { font-size: 18px; font-weight: 600; margin: 0 0 4px 0; }
+.hs-detail-dates { font-size: 13px; color: #666; margin-bottom: 10px; }
+.hs-detail-photo { width: 100%; max-height: 220px; object-fit: cover; border-radius: 6px; margin-bottom: 12px; display: block; }
+.hs-field { margin-bottom: 8px; font-size: 13px; }
+.hs-field strong { font-size: 11px; font-weight: 600; color: #888; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+.hs-last-updated { font-size: 11px; color: #aaa; margin-top: 16px; padding-top: 10px; border-top: 1px solid var(--border); }
+
+/* Admin headstone queue and edit proposals */
+.hs-queue-item { border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; }
+.hs-edit-diff { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--paper-2); border-radius: 5px; padding: 10px; margin: 8px 0; font-size: 12px; }
+.hs-diff-current { color: #666; }
+.hs-diff-proposed { color: var(--ink); font-weight: 500; }
+.hs-diff-changed { background: #fef9c3; border-radius: 3px; padding: 1px 4px; }
+

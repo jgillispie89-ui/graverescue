@@ -177,6 +177,54 @@ CREATE TABLE feedback (
 );
 
 -- =============================================================================
+-- HEADSTONES — individual buried persons
+-- =============================================================================
+CREATE TABLE headstones (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    cemetery_id     UUID NOT NULL REFERENCES cemeteries(id) ON DELETE CASCADE,
+    name            TEXT NOT NULL,
+    birth_year      INTEGER,
+    birth_month     INTEGER,
+    birth_day       INTEGER,
+    birth_place     TEXT,
+    death_year      INTEGER,
+    death_month     INTEGER,
+    death_day       INTEGER,
+    death_place     TEXT,
+    inscription     TEXT,
+    relationship    TEXT,
+    condition       VARCHAR(20),
+    photo_url       TEXT,
+    thumb_url       TEXT,
+    mod_status      VARCHAR(20) NOT NULL DEFAULT 'pending',
+    mod_note        TEXT,
+    submitted_by    UUID REFERENCES users(id),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ
+);
+CREATE INDEX idx_headstones_cemetery   ON headstones(cemetery_id);
+CREATE INDEX idx_headstones_name       ON headstones(name);
+CREATE INDEX idx_headstones_mod_status ON headstones(mod_status);
+
+-- =============================================================================
+-- HEADSTONE_EDITS — proposed edits queue (one pending per headstone)
+-- =============================================================================
+CREATE TABLE headstone_edits (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    headstone_id    UUID NOT NULL REFERENCES headstones(id) ON DELETE CASCADE,
+    proposed_by     UUID NOT NULL REFERENCES users(id),
+    proposed_data   JSONB NOT NULL,
+    status          VARCHAR(20) NOT NULL DEFAULT 'pending',
+    reviewed_by     UUID REFERENCES users(id),
+    reviewed_at     TIMESTAMPTZ,
+    mod_note        TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE UNIQUE INDEX idx_headstone_edits_one_pending
+    ON headstone_edits(headstone_id) WHERE status = 'pending';
+CREATE INDEX idx_headstone_edits_status ON headstone_edits(status);
+
+-- =============================================================================
 -- Convenience view: cemeteries as GeoJSON-ready rows
 -- =============================================================================
 CREATE OR REPLACE VIEW cemeteries_geojson AS

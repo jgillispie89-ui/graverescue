@@ -171,6 +171,54 @@ async function migrate() {
             updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
     `);
+
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS headstones (
+            id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            cemetery_id     UUID NOT NULL REFERENCES cemeteries(id) ON DELETE CASCADE,
+            name            TEXT NOT NULL,
+            birth_year      INTEGER,
+            birth_month     INTEGER,
+            birth_day       INTEGER,
+            birth_place     TEXT,
+            death_year      INTEGER,
+            death_month     INTEGER,
+            death_day       INTEGER,
+            death_place     TEXT,
+            inscription     TEXT,
+            relationship    TEXT,
+            condition       VARCHAR(20),
+            photo_url       TEXT,
+            thumb_url       TEXT,
+            mod_status      VARCHAR(20) NOT NULL DEFAULT 'pending',
+            mod_note        TEXT,
+            submitted_by    UUID REFERENCES users(id),
+            created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at      TIMESTAMPTZ
+        )
+    `);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_headstones_cemetery   ON headstones(cemetery_id)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_headstones_name       ON headstones(name)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_headstones_mod_status ON headstones(mod_status)`);
+
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS headstone_edits (
+            id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            headstone_id    UUID NOT NULL REFERENCES headstones(id) ON DELETE CASCADE,
+            proposed_by     UUID NOT NULL REFERENCES users(id),
+            proposed_data   JSONB NOT NULL,
+            status          VARCHAR(20) NOT NULL DEFAULT 'pending',
+            reviewed_by     UUID REFERENCES users(id),
+            reviewed_at     TIMESTAMPTZ,
+            mod_note        TEXT,
+            created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    `);
+    await pool.query(`
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_headstone_edits_one_pending
+            ON headstone_edits(headstone_id) WHERE status = 'pending'
+    `);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_headstone_edits_status ON headstone_edits(status)`);
 }
 
 // =============================================================================
@@ -462,6 +510,140 @@ app.delete('/api/cemeteries/:id', requireAuth, async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: (err as Error).message });
     }
+});
+
+// =============================================================================
+// GET /api/cemeteries/:id/headstones — public, approved only
+// =============================================================================
+app.get('/api/cemeteries/:id/headstones', async (req, res) => {
+    try {
+        const { rows } = await pool.query(
+            `SELECT id, cemetery_id, name, birth_year, birth_month, birth_day, birth_place,
+                    death_year, death_month, death_day, death_place,
+                    inscription, relationship, condition, photo_url, thumb_url,
+                    submitted_by, updated_at, created_at
+             FROM headstones
+             WHERE cemetery_id = $1 AND mod_status = 'approved'
+             ORDER BY name`,
+            [req.params.id]
+        );
+        res.json(rows);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// =============================================================================
+// GET /api/headstones/:id — public, approved only
+// =============================================================================
+app.get('/api/headstones/:id', async (req, res) => {
+    try {
+        const { rows } = await pool.query(
+            `SELECT id, cemetery_id, name, birth_year, birth_month, birth_day, birth_place,
+                    death_year, death_month, death_day, death_place,
+                    inscription, relationship, condition, photo_url, thumb_url,
+                    submitted_by, updated_at, created_at
+             FROM headstones WHERE id = $1 AND mod_status = 'approved'`,
+            [req.params.id]
+        );
+        if (!rows.length) return res.status(404).json({ error: 'Not found' });
+        res.json(rows[0]);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// =============================================================================
+// POST /api/cemeteries/:id/headstones — auth + verified required
+// =============================================================================
+app.post('/api/cemeteries/:id/headstones', requireAuth, async (req: any, res) => {
+    const user = req.user;
+    if (!user.verified) return res.status(403).json({ error: 'Verify your email before submitting headstones' });
+    const { name, birth_year, birth_month, birth_day, birth_place,
+            death_year, death_month, death_day, death_place,
+            inscription, relationship, condition, photo_url } = req.body;
+    if (!name?.trim()) return res.status(400).json({ error: 'name is required' });
+    const mod_status = (user.role === 'admin' || user.role === 'trusted') ? 'approved' : 'pending';
+    try {
+        const { rows } = await pool.query(
+            `INSERT INTO headstones (cemetery_id, name, birth_year, birth_month, birth_day, birth_place,
+                death_year, death_month, death_day, death_place,
+                inscription, relationship, condition, photo_url, mod_status, submitted_by)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+             RETURNING *`,
+            [req.params.id, name.trim(),
+             birth_year||null, birth_month||null, birth_day||null, birth_place||null,
+             death_year||null, death_month||null, death_day||null, death_place||null,
+             inscription||null, relationship||null, condition||null, photo_url||null,
+             mod_status, user.id]
+        );
+        res.status(201).json(rows[0]);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// =============================================================================
+// POST /api/headstones/:id/propose-edit — auth + verified
+// =============================================================================
+app.post('/api/headstones/:id/propose-edit', requireAuth, async (req: any, res) => {
+    const user = req.user;
+    if (!user.verified) return res.status(403).json({ error: 'Verify your email first' });
+    try {
+        await pool.query(
+            `INSERT INTO headstone_edits (headstone_id, proposed_by, proposed_data)
+             VALUES ($1, $2, $3)`,
+            [req.params.id, user.id, JSON.stringify(req.body)]
+        );
+        res.json({ ok: true });
+    } catch (err: any) {
+        if (err.code === '23505') {
+            return res.status(409).json({ error: "There's already a pending edit on this headstone. Please wait until it's reviewed before proposing another change." });
+        }
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// =============================================================================
+// PATCH /api/headstones/:id — admin or original submitter only
+// =============================================================================
+app.patch('/api/headstones/:id', requireAuth, async (req: any, res) => {
+    const user = req.user;
+    const { rows: existing } = await pool.query(`SELECT submitted_by FROM headstones WHERE id=$1`, [req.params.id]);
+    if (!existing.length) return res.status(404).json({ error: 'Not found' });
+    if (user.role !== 'admin' && existing[0].submitted_by !== user.id)
+        return res.status(403).json({ error: 'Not authorized' });
+    const { name, birth_year, birth_month, birth_day, birth_place,
+            death_year, death_month, death_day, death_place,
+            inscription, relationship, condition, photo_url } = req.body;
+    if (!name?.trim()) return res.status(400).json({ error: 'name is required' });
+    try {
+        const { rows } = await pool.query(
+            `UPDATE headstones SET name=$1, birth_year=$2, birth_month=$3, birth_day=$4, birth_place=$5,
+                death_year=$6, death_month=$7, death_day=$8, death_place=$9,
+                inscription=$10, relationship=$11, condition=$12, photo_url=$13, updated_at=NOW()
+             WHERE id=$14 RETURNING *`,
+            [name.trim(), birth_year||null, birth_month||null, birth_day||null, birth_place||null,
+             death_year||null, death_month||null, death_day||null, death_place||null,
+             inscription||null, relationship||null, condition||null, photo_url||null, req.params.id]
+        );
+        res.json(rows[0]);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// =============================================================================
+// DELETE /api/headstones/:id — admin or original submitter only
+// =============================================================================
+app.delete('/api/headstones/:id', requireAuth, async (req: any, res) => {
+    const user = req.user;
+    const { rows: existing } = await pool.query(`SELECT submitted_by FROM headstones WHERE id=$1`, [req.params.id]);
+    if (!existing.length) return res.status(404).json({ error: 'Not found' });
+    if (user.role !== 'admin' && existing[0].submitted_by !== user.id)
+        return res.status(403).json({ error: 'Not authorized' });
+    await pool.query(`DELETE FROM headstones WHERE id=$1`, [req.params.id]);
+    res.json({ ok: true });
 });
 
 // =============================================================================

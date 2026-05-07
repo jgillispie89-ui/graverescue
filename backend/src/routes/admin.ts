@@ -169,41 +169,36 @@ router.post('/send-password-reset', requireAdmin, async (req, res) => {
 // (new headstones + pending edits + pending cemeteries + new feedback)
 // Build the cron/scheduler when email delivery is confirmed working.
 
-// Headstone queue
-router.get('/headstones/queue', requireAdmin, async (_req, res) => {
+// Recent headstones feed (replaces queue — headstones now auto-approve)
+router.get('/headstones/recent', requireAdmin, async (req, res) => {
     try {
-        const { rows } = await pool.query(`
-            SELECT h.*, c.name AS cemetery_name, u.email AS submitter_email
+        const since = req.query.since as string | undefined;
+        let query = `
+            SELECT h.id, h.name, h.cemetery_id, h.photo_url, h.thumb_url,
+                   h.created_at, h.submitted_by,
+                   c.name AS cemetery_name,
+                   u.email AS submitter_email
             FROM headstones h
             LEFT JOIN cemeteries c ON c.id = h.cemetery_id
             LEFT JOIN users u ON u.id = h.submitted_by
-            WHERE h.mod_status = 'pending'
-            ORDER BY h.created_at ASC
-        `);
+            WHERE h.mod_status = 'approved'
+        `;
+        const params: any[] = [];
+        if (since) {
+            params.push(since);
+            query += ` AND h.created_at > $${params.length}`;
+        }
+        query += ` ORDER BY h.created_at DESC LIMIT 100`;
+        const { rows } = await pool.query(query, params);
         res.json(rows);
     } catch (err: any) {
         res.status(500).json({ error: err.message });
     }
 });
-router.get('/headstones/queue-count', requireAdmin, async (_req, res) => {
+
+router.delete('/headstones/:id', requireAdmin, async (req, res) => {
     try {
-        const { rows } = await pool.query(`SELECT COUNT(*) FROM headstones WHERE mod_status='pending'`);
-        res.json({ count: parseInt(rows[0].count) });
-    } catch (err: any) {
-        res.status(500).json({ error: err.message });
-    }
-});
-router.post('/headstones/approve/:id', requireAdmin, async (req, res) => {
-    try {
-        await pool.query(`UPDATE headstones SET mod_status='approved' WHERE id=$1`, [req.params.id]);
-        res.json({ ok: true });
-    } catch (err: any) {
-        res.status(500).json({ error: err.message });
-    }
-});
-router.post('/headstones/reject/:id', requireAdmin, async (req, res) => {
-    try {
-        await pool.query(`UPDATE headstones SET mod_status='rejected' WHERE id=$1`, [req.params.id]);
+        await pool.query(`DELETE FROM headstones WHERE id=$1`, [req.params.id]);
         res.json({ ok: true });
     } catch (err: any) {
         res.status(500).json({ error: err.message });

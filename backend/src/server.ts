@@ -221,6 +221,18 @@ async function migrate() {
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_headstone_edits_status ON headstone_edits(status)`);
 }
 
+// In-memory rate limiter for headstone submissions: 200 per user per 24h
+const hsSubmitLog = new Map<string, number[]>();
+function checkHsRateLimit(userId: string): boolean {
+    const now = Date.now();
+    const cutoff = now - 24 * 60 * 60 * 1000;
+    const log = (hsSubmitLog.get(userId) || []).filter(t => t > cutoff);
+    if (log.length >= 200) return false;
+    log.push(now);
+    hsSubmitLog.set(userId, log);
+    return true;
+}
+
 // =============================================================================
 // Routes
 // =============================================================================
@@ -343,7 +355,7 @@ app.post('/api/cemeteries', requireAuth, async (req, res) => {
             return res.status(403).json({ error: 'Verify your email before submitting cemeteries' });
 
         const { name, cemetery_type, rescue_status, lng, lat,
-                established_year, last_known_year, stone_count,
+                established_year, last_known_year,
                 city, state_province, description, names_inscriptions,
                 photo_url, photos } = req.body;
 
@@ -359,14 +371,14 @@ app.post('/api/cemeteries', requireAuth, async (req, res) => {
         const mod_status = (user.role === 'admin' || user.role === 'trusted') ? 'approved' : 'pending';
         const { rows } = await pool.query(
             `INSERT INTO cemeteries (name, cemetery_type, rescue_status, geom,
-                established_year, last_known_year, stone_count,
+                established_year, last_known_year,
                 city, state_province, description, names_inscriptions,
                 photo_url, mod_status, submitted_by)
              VALUES ($1, $2, $3, ST_SetSRID(ST_MakePoint($4, $5), 4326),
-                $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+                $6, $7, $8, $9, $10, $11, $12, $13, $14)
              RETURNING id, name, cemetery_type, rescue_status, mod_status`,
             [name, cemetery_type, rescue_status, lng, lat,
-             established_year || null, last_known_year || null, stone_count || null,
+             established_year || null, last_known_year || null,
              city || null, state_province || null, description || null,
              names_inscriptions || null, primaryPhotoUrl, mod_status, user.id]
         );
@@ -444,7 +456,7 @@ app.patch('/api/cemeteries/:id', requireAuth, async (req, res) => {
             return res.status(403).json({ error: 'Not authorized to edit this cemetery' });
 
         const { name, cemetery_type, rescue_status, lng, lat,
-                established_year, last_known_year, stone_count,
+                established_year, last_known_year,
                 city, state_province, description, names_inscriptions, photos } = req.body;
         if (!name || !cemetery_type || !rescue_status)
             return res.status(400).json({ error: 'name, cemetery_type, and rescue_status are required' });
@@ -452,7 +464,7 @@ app.patch('/api/cemeteries/:id', requireAuth, async (req, res) => {
         const hasCoords = lng != null && lat != null && Number.isFinite(+lng) && Number.isFinite(+lat);
         const params: any[] = [
             name, cemetery_type, rescue_status,
-            established_year || null, last_known_year || null, stone_count || null,
+            established_year || null, last_known_year || null,
             city || null, state_province || null, description || null, names_inscriptions || null,
         ];
         if (hasCoords) { params.push(+lng, +lat); }
@@ -462,13 +474,13 @@ app.patch('/api/cemeteries/:id', requireAuth, async (req, res) => {
         const { rows } = await pool.query(
             `UPDATE cemeteries SET
                 name=$1, cemetery_type=$2, rescue_status=$3,
-                established_year=$4, last_known_year=$5, stone_count=$6,
-                city=$7, state_province=$8, description=$9, names_inscriptions=$10,
+                established_year=$4, last_known_year=$5,
+                city=$6, state_province=$7, description=$8, names_inscriptions=$9,
                 updated_at=NOW()
-                ${hasCoords ? `, geom=ST_SetSRID(ST_MakePoint($11,$12),4326)` : ''}
+                ${hasCoords ? `, geom=ST_SetSRID(ST_MakePoint($10,$11),4326)` : ''}
              WHERE id=$${idIdx}
              RETURNING id, name, cemetery_type, rescue_status,
-                       established_year, last_known_year, stone_count,
+                       established_year, last_known_year,
                        city, state_province, description, updated_at`,
             params
         );
@@ -563,7 +575,10 @@ app.post('/api/cemeteries/:id/headstones', requireAuth, async (req: any, res) =>
             death_year, death_month, death_day, death_place,
             inscription, relationship, condition, photo_url } = req.body;
     if (!name?.trim()) return res.status(400).json({ error: 'name is required' });
-    const mod_status = (user.role === 'admin' || user.role === 'trusted') ? 'approved' : 'pending';
+    if (!checkHsRateLimit(user.id)) {
+        return res.status(429).json({ error: "You've reached the daily limit of 200 headstones. Please continue tomorrow or contact an admin if you have a large project." });
+    }
+    const mod_status = user.verified ? 'approved' : 'pending';
     try {
         const { rows } = await pool.query(
             `INSERT INTO headstones (cemetery_id, name, birth_year, birth_month, birth_day, birth_place,

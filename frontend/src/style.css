@@ -776,3 +776,47 @@ main { flex: 1; display: grid; grid-template-columns: 260px 1fr; position: relat
 .hs-diff-proposed { color: var(--ink); font-weight: 500; }
 .hs-diff-changed { background: #fef9c3; border-radius: 3px; padding: 1px 4px; }
 
+/* Quick-add toggle row */
+.hs-quickadd-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--paper-2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 14px;
+}
+.hs-quickadd-label {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--ink) !important;
+    margin: 0 !important;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.hs-quickadd-label input[type="checkbox"] { width: auto; flex-shrink: 0; }
+.hs-quickadd-hint { font-size: 11px; color: #888; }
+
+/* Session count badge */
+.hs-session-count {
+    font-size: 12px;
+    color: var(--gr-reclaimed);
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+/* Mobile: larger touch targets in headstone form */
+@media (max-width: 600px) {
+    #headstone-form .modal-box input,
+    #headstone-form .modal-box select,
+    #headstone-form .modal-box textarea {
+        font-size: 16px;
+        padding: 10px 12px;
+    }
+    #headstone-form .modal-box label { font-size: 13px; }
+}
+

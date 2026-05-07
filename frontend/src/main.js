@@ -556,62 +556,71 @@ async function refreshAdminFeedback() {
 document.getElementById('admin-fb-show-all')?.addEventListener('change', refreshAdminFeedback);
 
 // =============================================================================
-// Admin headstone queue
+// Admin headstone recent feed
 // =============================================================================
 async function refreshAdminHsQueue() {
     let container = document.getElementById('admin-hs-queue');
     if (!container) {
-        // Inject the section into the admin modal box
-        const box = document.querySelector('#admin-modal .modal-box');
-        if (!box) return;
+        // inject section if not present
+        const adminQueue = document.getElementById('admin-queue');
+        if (!adminQueue) return;
         const section = document.createElement('div');
         section.innerHTML = `
-            <h3 style="margin-top:24px;margin-bottom:8px;font-size:16px">
-                Headstone Queue
-                <span id="admin-hs-badge" class="fb-count-badge" style="display:none"></span>
-            </h3>
-            <div id="admin-hs-queue"><p class="hint">Loading…</p></div>
-        `;
-        box.appendChild(section);
-        container = document.getElementById('admin-hs-queue');
-    }
-    container.innerHTML = '<p class="hint">Loading…</p>';
-    try {
-        const res  = await authedFetch(`${API_BASE}/api/admin/headstones/queue`);
-        const rows = await res.json();
-        const badge = document.getElementById('admin-hs-badge');
-        if (badge) {
-            badge.textContent    = rows.length;
-            badge.style.display  = rows.length > 0 ? 'inline-block' : 'none';
-        }
-        if (!rows.length) { container.innerHTML = '<p class="hint">No pending headstones.</p>'; return; }
-        container.innerHTML = rows.map(h => `
-            <div class="hs-queue-item" data-id="${esc(h.id)}">
-                <div class="queue-name">${esc(h.name)}</div>
-                <div class="queue-meta">${esc(h.cemetery_name || '—')} · by ${esc(h.submitter_email || 'unknown')}</div>
-                ${h.birth_year || h.death_year ? `<div class="queue-desc">${esc(formatHsDates(h))}</div>` : ''}
-                ${h.inscription ? `<div class="queue-desc" style="font-style:italic">${esc(h.inscription)}</div>` : ''}
-                <div class="queue-actions" style="margin-top:8px">
-                    <button class="btn-approve hs-approve-btn" data-id="${esc(h.id)}">✓ Approve</button>
-                    <button class="btn-reject  hs-reject-btn"  data-id="${esc(h.id)}">✕ Reject</button>
-                </div>
+            <h3 style="margin-top:24px;margin-bottom:8px;font-size:16px">Recent Headstones</h3>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+                <button id="hs-mark-reviewed" class="btn-secondary" style="font-size:12px;padding:4px 10px">Mark all as reviewed</button>
+                <span id="hs-last-reviewed" style="font-size:11px;color:#999"></span>
             </div>
-        `).join('');
-        container.querySelectorAll('.hs-approve-btn').forEach(btn =>
-            btn.addEventListener('click', async () => {
-                await authedFetch(`${API_BASE}/api/admin/headstones/approve/${btn.dataset.id}`, { method: 'POST', body: '{}' });
-                await refreshAdminHsQueue();
-            })
-        );
-        container.querySelectorAll('.hs-reject-btn').forEach(btn =>
-            btn.addEventListener('click', async () => {
-                await authedFetch(`${API_BASE}/api/admin/headstones/reject/${btn.dataset.id}`, { method: 'POST', body: '{}' });
-                await refreshAdminHsQueue();
-            })
-        );
-    } catch (err) {
-        container.innerHTML = `<p class="form-status err">${esc(err.message)}</p>`;
+            <div id="admin-hs-queue"></div>
+        `;
+        adminQueue.parentNode?.insertBefore(section, adminQueue.nextSibling);
+        container = document.getElementById('admin-hs-queue');
+
+        document.getElementById('hs-mark-reviewed')?.addEventListener('click', () => {
+            localStorage.setItem('gr_hs_last_reviewed', new Date().toISOString());
+            updateHsLastReviewedLabel();
+            refreshAdminHsQueue();
+        });
     }
+
+    updateHsLastReviewedLabel();
+    const since = localStorage.getItem('gr_hs_last_reviewed');
+    const url   = `${API_BASE}/api/admin/headstones/recent${since ? '?since=' + encodeURIComponent(since) : ''}`;
+    const res   = await authedFetch(url);
+    const rows  = await res.json();
+    if (!rows.length) {
+        container.innerHTML = '<p class="hint">No new headstones since last review.</p>';
+        return;
+    }
+    container.innerHTML = '';
+    rows.forEach(h => {
+        const item = document.createElement('div');
+        item.className = 'hs-queue-item';
+        item.innerHTML = `
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                ${h.thumb_url ? `<img src="${esc(h.thumb_url)}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;flex-shrink:0">` : ''}
+                <div style="flex:1;min-width:0">
+                    <div class="queue-name">${esc(h.name)}</div>
+                    <div class="queue-meta">${esc(h.cemetery_name || '')} · ${esc(h.submitter_email || '')} · ${new Date(h.created_at).toLocaleDateString()}</div>
+                </div>
+                <button class="btn-reject hs-admin-delete" data-id="${h.id}" style="font-size:12px;padding:3px 8px">Delete</button>
+            </div>
+        `;
+        item.querySelector('.hs-admin-delete')?.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (!confirm(`Delete headstone "${h.name}"?`)) return;
+            await authedFetch(`${API_BASE}/api/admin/headstones/${h.id}`, { method: 'DELETE' });
+            refreshAdminHsQueue();
+        });
+        container.appendChild(item);
+    });
+}
+
+function updateHsLastReviewedLabel() {
+    const el = document.getElementById('hs-last-reviewed');
+    if (!el) return;
+    const ts = localStorage.getItem('gr_hs_last_reviewed');
+    el.textContent = ts ? `Last reviewed: ${new Date(ts).toLocaleString()}` : 'Never marked as reviewed';
 }
 
 // =============================================================================
@@ -1018,7 +1027,6 @@ document.getElementById('sf-submit').addEventListener('click', async () => {
         state_province:     document.getElementById('sf-state').value.trim().toUpperCase() || null,
         established_year:   parseInt(document.getElementById('sf-built').value) || null,
         last_known_year:    parseInt(document.getElementById('sf-closed').value) || null,
-        stone_count:        parseInt(document.getElementById('sf-stones').value) || null,
         description:        document.getElementById('sf-desc').value.trim() || null,
         names_inscriptions: document.getElementById('sf-names').value.trim() || null,
         photos:             sfPhotos.length > 0 ? sfPhotos : undefined,
@@ -1353,7 +1361,7 @@ async function showDetail(props) {
     const stateVal     = d.state_province != null ? d.state_province : props.state;
     const estYear      = d.established_year != null ? d.established_year : props.established_year;
     const lastYear     = d.last_known_year  != null ? d.last_known_year  : props.last_known_year;
-    const stoneCount   = d.stone_count    != null ? d.stone_count    : props.stone_count;
+    // stone_count removed from display (headstone section header already shows documented count)
     const description  = d.description   != null ? d.description    : props.description;
     const namesInsc    = d.names_inscriptions;
     const submittedBy  = d.submitted_by   != null ? d.submitted_by   : props.submitted_by;
@@ -1375,7 +1383,6 @@ async function showDetail(props) {
     const dates = [];
     if (estYear)    dates.push(`Est. ${estYear}`);
     if (lastYear)   dates.push(`Last known ${lastYear}`);
-    if (stoneCount) dates.push(`~${stoneCount} stones`);
 
     const canAct = auth.user && (auth.user.role === 'admin' || auth.user.id === submittedBy);
 
@@ -1403,7 +1410,7 @@ async function showDetail(props) {
     });
 
     document.getElementById('btn-edit-site')?.addEventListener('click', () => {
-        renderEditForm(detail || { id: props.id, name, cemetery_type: cemType, rescue_status: rescueStatus, city, state_province: stateVal, established_year: estYear, last_known_year: lastYear, stone_count: stoneCount, description, names_inscriptions: namesInsc });
+        renderEditForm(detail || { id: props.id, name, cemetery_type: cemType, rescue_status: rescueStatus, city, state_province: stateVal, established_year: estYear, last_known_year: lastYear, description, names_inscriptions: namesInsc });
     });
 
     if (canAct) {
@@ -1474,7 +1481,6 @@ function renderEditForm(detail) {
             <label>Longitude<input type="number" id="ef-lng" step="any" value="${lng}"></label>
             <label>Year established<input type="number" id="ef-built" value="${detail.established_year || ''}"></label>
             <label>Last known year<input type="number" id="ef-closed" value="${detail.last_known_year || ''}"></label>
-            <label>Stone count<input type="number" id="ef-stones" value="${detail.stone_count || ''}"></label>
             <label>Description<textarea id="ef-desc" rows="3">${esc(detail.description || '')}</textarea></label>
             <label>Names / inscriptions<textarea id="ef-names" rows="2">${esc(detail.names_inscriptions || '')}</textarea></label>
             ${existingPhotos.length > 0 ? `
@@ -1640,7 +1646,6 @@ async function saveEdit(cemId) {
                 state_province:     document.getElementById('ef-state').value.trim().toUpperCase() || null,
                 established_year:   parseInt(document.getElementById('ef-built').value)  || null,
                 last_known_year:    parseInt(document.getElementById('ef-closed').value) || null,
-                stone_count:        parseInt(document.getElementById('ef-stones').value) || null,
                 description:        document.getElementById('ef-desc').value.trim()  || null,
                 names_inscriptions: document.getElementById('ef-names').value.trim() || null,
                 photos:             editPhotos.length > 0 ? editPhotos : undefined,
@@ -1901,82 +1906,100 @@ function openProposeEditForm(hs, cemId) {
 // Headstones — form open/close
 // =============================================================================
 let _currentHsCemId = null;
+let hsSessionCount = 0;
 
 function openHeadstoneForm(cemId) {
     _currentHsCemId = cemId;
     const modal = document.getElementById('headstone-form');
     if (!modal) return;
-    // Reset fields
+    resetHeadstoneForm();
+    modal.classList.remove('hidden');
+    setTimeout(() => document.getElementById('hs-name')?.focus(), 50);
+}
+
+function resetHeadstoneForm() {
     ['hs-name','hs-birth-year','hs-birth-month','hs-birth-day','hs-birth-place',
      'hs-death-year','hs-death-month','hs-death-day','hs-death-place',
      'hs-inscription','hs-relationship'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
     });
-    const condEl = document.getElementById('hs-condition');
-    if (condEl) condEl.value = '';
-    const msgEl = document.getElementById('hs-status-msg');
-    if (msgEl) { msgEl.textContent = ''; msgEl.className = 'form-status'; }
-    modal.classList.remove('hidden');
-    setTimeout(() => document.getElementById('hs-name')?.focus(), 50);
+    const cond = document.getElementById('hs-condition');
+    if (cond) cond.value = '';
+    const msg = document.getElementById('hs-status-msg');
+    if (msg) { msg.textContent = ''; msg.className = 'form-status'; }
 }
 
 function closeHeadstoneForm() {
     document.getElementById('headstone-form')?.classList.add('hidden');
     _currentHsCemId = null;
+    hsSessionCount = 0;
+    resetHeadstoneForm();
+    const countEl = document.getElementById('hs-session-count');
+    if (countEl) countEl.classList.add('hidden');
+    const toggle = document.getElementById('hs-quickadd-toggle');
+    if (toggle) toggle.checked = false;
+    const fullFields = document.getElementById('hs-full-fields');
+    if (fullFields) fullFields.style.display = '';
 }
 
 // =============================================================================
 // Headstones — submit new headstone
 // =============================================================================
-async function submitHeadstone(cemId) {
+async function saveHeadstone(cemId, keepOpen) {
     const msg  = document.getElementById('hs-status-msg');
-    const name = document.getElementById('hs-name')?.value.trim();
+    const name = document.getElementById('hs-name').value.trim();
     if (!name) {
         msg.textContent = '✕ Name is required.';
         msg.className   = 'form-status err';
         return;
     }
-    msg.textContent = '';
-    msg.className   = 'form-status';
-    const btn     = document.getElementById('hs-submit');
-    const restore = btnLoading(btn, 'Submitting…');
-    const cancel  = coldStartHint(msg);
     const body = {
         name,
-        birth_year:    parseInt(document.getElementById('hs-birth-year')?.value)  || null,
-        birth_month:   parseInt(document.getElementById('hs-birth-month')?.value) || null,
-        birth_day:     parseInt(document.getElementById('hs-birth-day')?.value)   || null,
-        birth_place:   document.getElementById('hs-birth-place')?.value.trim()    || null,
-        death_year:    parseInt(document.getElementById('hs-death-year')?.value)  || null,
-        death_month:   parseInt(document.getElementById('hs-death-month')?.value) || null,
-        death_day:     parseInt(document.getElementById('hs-death-day')?.value)   || null,
-        death_place:   document.getElementById('hs-death-place')?.value.trim()    || null,
-        inscription:   document.getElementById('hs-inscription')?.value.trim()   || null,
-        relationship:  document.getElementById('hs-relationship')?.value.trim()  || null,
-        condition:     document.getElementById('hs-condition')?.value             || null,
+        birth_year:   parseInt(document.getElementById('hs-birth-year')?.value)  || null,
+        birth_month:  parseInt(document.getElementById('hs-birth-month')?.value) || null,
+        birth_day:    parseInt(document.getElementById('hs-birth-day')?.value)   || null,
+        birth_place:  document.getElementById('hs-birth-place')?.value.trim()    || null,
+        death_year:   parseInt(document.getElementById('hs-death-year')?.value)  || null,
+        death_month:  parseInt(document.getElementById('hs-death-month')?.value) || null,
+        death_day:    parseInt(document.getElementById('hs-death-day')?.value)   || null,
+        death_place:  document.getElementById('hs-death-place')?.value.trim()    || null,
+        inscription:  document.getElementById('hs-inscription')?.value.trim()   || null,
+        relationship: document.getElementById('hs-relationship')?.value.trim()  || null,
+        condition:    document.getElementById('hs-condition')?.value             || null,
     };
+    msg.textContent = '';
+    msg.className   = 'form-status';
+    const btn     = keepOpen ? document.getElementById('hs-save-another') : document.getElementById('hs-submit');
+    const restore = btnLoading(btn, 'Saving…');
     try {
         const res  = await authedFetch(`${API_BASE}/api/cemeteries/${cemId}/headstones`, {
             method: 'POST', body: JSON.stringify(body),
         });
-        cancel();
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
-        const live = data.mod_status === 'approved';
-        msg.textContent = live
-            ? '✓ Headstone added!'
-            : '✓ Submitted for review! It will appear once approved.';
-        msg.className = 'form-status ok';
-        setTimeout(() => {
+        hsSessionCount++;
+        const countEl = document.getElementById('hs-session-count');
+        if (countEl) {
+            countEl.textContent = `${hsSessionCount} headstone${hsSessionCount === 1 ? '' : 's'} added this session`;
+            countEl.classList.remove('hidden');
+        }
+        const isVerified = !!(auth.user?.verified);
+        if (keepOpen) {
+            resetHeadstoneForm();
+            msg.textContent = '✓ Saved — add the next one';
+            msg.className   = 'form-status ok';
+            setTimeout(() => { if (msg.textContent.startsWith('✓ Saved')) { msg.textContent = ''; msg.className = 'form-status'; } }, 2000);
+        } else {
             closeHeadstoneForm();
-            if (currentProps) showDetail(currentProps);
-        }, 1800);
+            loadHeadstones(cemId);
+            showBanner(isVerified ? '✓ Headstone added' : '✓ Submitted for review', 'ok');
+        }
     } catch (err) {
-        cancel();
-        restore();
         msg.textContent = '✕ ' + err.message;
         msg.className   = 'form-status err';
+    } finally {
+        restore();
     }
 }
 
@@ -2077,8 +2100,15 @@ function coldStartHint(msgEl, delayMs = 5000) {
 // =============================================================================
 document.getElementById('hs-cancel-btn')?.addEventListener('click', closeHeadstoneForm);
 document.getElementById('hs-cancel')?.addEventListener('click', closeHeadstoneForm);
+document.getElementById('hs-save-another')?.addEventListener('click', () => {
+    if (_currentHsCemId) saveHeadstone(_currentHsCemId, true);
+});
 document.getElementById('hs-submit')?.addEventListener('click', () => {
-    if (_currentHsCemId) submitHeadstone(_currentHsCemId);
+    if (_currentHsCemId) saveHeadstone(_currentHsCemId, false);
+});
+document.getElementById('hs-quickadd-toggle')?.addEventListener('change', (e) => {
+    const fullFields = document.getElementById('hs-full-fields');
+    if (fullFields) fullFields.style.display = e.target.checked ? 'none' : '';
 });
 document.getElementById('headstone-form')?.addEventListener('click', e => {
     if (e.target === e.currentTarget) closeHeadstoneForm();

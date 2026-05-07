@@ -136,7 +136,6 @@
                 <label>State <input type="text" id="sf-state" placeholder="e.g. KY" maxlength="2"></label>
                 <label>Year established <input type="number" id="sf-built" placeholder="e.g. 1843"></label>
                 <label>Last known year active <input type="number" id="sf-closed" placeholder="e.g. 1920"></label>
-                <label>Approx. stone count <input type="number" id="sf-stones" placeholder="e.g. 12 (leave blank if unknown)"></label>
                 <label>Description<textarea id="sf-desc" rows="3" placeholder="What do you know about this cemetery?"></textarea></label>
                 <label>Names / inscriptions found<textarea id="sf-names" rows="2" placeholder="List any names or inscriptions you can read"></textarea></label>
                 <label>Photo</label>
@@ -326,35 +325,46 @@
         <div class="modal-box">
             <button class="close-btn" id="hs-cancel-btn">×</button>
             <h3>Add Headstone</h3>
-            <p class="hint" style="margin:-8px 0 14px 0">Only the name is required. All other fields are optional.</p>
+            <div class="hs-quickadd-row">
+                <label class="hs-quickadd-label">
+                    <input type="checkbox" id="hs-quickadd-toggle">
+                    <span>Quick add (name only)</span>
+                </label>
+                <span class="hs-quickadd-hint">Tap to enter names fast in the field. Fill details later via Edit.</span>
+            </div>
             <label>Name <span style="color:#A32D2D">*</span><input type="text" id="hs-name" placeholder="Full name as inscribed"></label>
-            <div style="display:flex;gap:8px">
-                <label style="flex:1">Birth year<input type="number" id="hs-birth-year" placeholder="e.g. 1843"></label>
-                <label style="flex:1">Month<input type="number" id="hs-birth-month" placeholder="1–12" min="1" max="12"></label>
-                <label style="flex:1">Day<input type="number" id="hs-birth-day" placeholder="1–31" min="1" max="31"></label>
+            <div id="hs-full-fields">
+                <p class="hint" style="margin:-8px 0 14px 0">Only the name is required. All other fields are optional.</p>
+                <div style="display:flex;gap:8px">
+                    <label style="flex:1">Birth year<input type="number" id="hs-birth-year" placeholder="e.g. 1843"></label>
+                    <label style="flex:1">Month<input type="number" id="hs-birth-month" placeholder="1–12" min="1" max="12"></label>
+                    <label style="flex:1">Day<input type="number" id="hs-birth-day" placeholder="1–31" min="1" max="31"></label>
+                </div>
+                <label>Birth place<input type="text" id="hs-birth-place" placeholder="e.g. County Cork, Ireland"></label>
+                <div style="display:flex;gap:8px">
+                    <label style="flex:1">Death year<input type="number" id="hs-death-year" placeholder="e.g. 1901"></label>
+                    <label style="flex:1">Month<input type="number" id="hs-death-month" placeholder="1–12" min="1" max="12"></label>
+                    <label style="flex:1">Day<input type="number" id="hs-death-day" placeholder="1–31" min="1" max="31"></label>
+                </div>
+                <label>Death place<input type="text" id="hs-death-place" placeholder="e.g. Harlan County, KY"></label>
+                <label>Inscription / epitaph<textarea id="hs-inscription" rows="2" placeholder="Exact text from the stone"></textarea></label>
+                <label>Relationship<input type="text" id="hs-relationship" placeholder='e.g. "wife of John Smith", "infant son of..."'></label>
+                <label>Condition
+                    <select id="hs-condition">
+                        <option value="">— unknown —</option>
+                        <option value="legible">Legible</option>
+                        <option value="partially_legible">Partially legible</option>
+                        <option value="illegible">Illegible</option>
+                        <option value="broken">Broken</option>
+                        <option value="missing">Missing / gone</option>
+                    </select>
+                </label>
             </div>
-            <label>Birth place<input type="text" id="hs-birth-place" placeholder="e.g. County Cork, Ireland"></label>
-            <div style="display:flex;gap:8px">
-                <label style="flex:1">Death year<input type="number" id="hs-death-year" placeholder="e.g. 1901"></label>
-                <label style="flex:1">Month<input type="number" id="hs-death-month" placeholder="1–12" min="1" max="12"></label>
-                <label style="flex:1">Day<input type="number" id="hs-death-day" placeholder="1–31" min="1" max="31"></label>
-            </div>
-            <label>Death place<input type="text" id="hs-death-place" placeholder="e.g. Harlan County, KY"></label>
-            <label>Inscription / epitaph<textarea id="hs-inscription" rows="2" placeholder="Exact text from the stone"></textarea></label>
-            <label>Relationship<input type="text" id="hs-relationship" placeholder='e.g. "wife of John Smith", "infant son of..."'></label>
-            <label>Condition
-                <select id="hs-condition">
-                    <option value="">— unknown —</option>
-                    <option value="legible">Legible</option>
-                    <option value="partially_legible">Partially legible</option>
-                    <option value="illegible">Illegible</option>
-                    <option value="broken">Broken</option>
-                    <option value="missing">Missing / gone</option>
-                </select>
-            </label>
+            <div id="hs-session-count" class="hs-session-count hidden">0 headstones added this session</div>
             <div class="form-btns">
                 <button id="hs-cancel" class="btn-secondary">Cancel</button>
-                <button id="hs-submit" class="btn-primary">Submit</button>
+                <button id="hs-save-another" class="btn-secondary">Save &amp; Add Another</button>
+                <button id="hs-submit" class="btn-primary">Save &amp; Close</button>
             </div>
             <p id="hs-status-msg" class="form-status"></p>
         </div>

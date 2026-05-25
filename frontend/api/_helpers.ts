@@ -32,8 +32,16 @@ export function requireAdmin(handler: Function) {
     };
 }
 
-export function cors(res: VercelResponse) {
-    res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || 'https://graverescue.com');
+export function cors(req: VercelRequest, res: VercelResponse) {
+    const allowed = (process.env.CORS_ORIGIN || 'https://graverescue.com')
+        .split(',')
+        .map(s => s.trim());
+    const origin = req.headers.origin as string;
+    if (origin && allowed.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    } else {
+        res.setHeader('Access-Control-Allow-Origin', allowed[0]);
+    }
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
 }

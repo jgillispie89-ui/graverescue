@@ -3,7 +3,7 @@ import { supabase } from '../_supabase.js';
 import { requireAdmin, cors } from '../_helpers.js';
 
 export default requireAdmin(async (req: VercelRequest, res: VercelResponse, adminUser: any) => {
-    cors(res);
+    cors(req, res);
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     const { slug } = req.query;

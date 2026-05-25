@@ -1,11 +1,6 @@
 {
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
-  "functions": {
-    "frontend/api/**/*.ts": {
-      "runtime": "@vercel/node@3.2.0"
-    }
-  },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/frontend/api/$1" }
   ]
